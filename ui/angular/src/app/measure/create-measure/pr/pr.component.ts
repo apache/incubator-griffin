@@ -309,6 +309,7 @@ export class PrComponent implements AfterViewChecked, OnInit {
         );
       case "Regular Expression Detection Count":
         return (
+          //regular expression checking should not be hard coded here, am not familiar with front end development, anyone can modify the line below?
           `count(source.${col.name}) AS \`${col.name}_regexcount\` WHERE source.${col.name} RLIKE '^[0-9]{4}$'`
         );
       case "Enum Detection Top5 Count":
