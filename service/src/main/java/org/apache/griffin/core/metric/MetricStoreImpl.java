@@ -56,7 +56,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MetricStoreImpl implements MetricStore {
 
-    private static final String INDEX = "griffin";
+    @Value("${index}")
+    private String INDEX;
     private static final String TYPE = "accuracy";
 
     private RestClient client;
