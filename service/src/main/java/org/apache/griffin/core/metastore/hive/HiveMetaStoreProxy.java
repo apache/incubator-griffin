@@ -19,16 +19,20 @@ under the License.
 
 package org.apache.griffin.core.metastore.hive;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.IMetaStoreClient;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 @Component
 public class HiveMetaStoreProxy {
@@ -54,6 +58,28 @@ public class HiveMetaStoreProxy {
     private String interval;
 
     private IMetaStoreClient client = null;
+
+    @Value("${krb5conf.path}")
+    private String krb5confPath;
+
+    @Value("${hive.keytab.path}")
+    private String keytabPath;
+
+    @Value("${hive.keytab.user}")
+    private String keytabUser;
+
+    @Value("${hive.need.kerberos}")
+    private String needKerberos;
+
+    @PostConstruct
+    public void init() throws IOException {
+        if ( needKerberos != null && "true".equalsIgnoreCase(needKerberos) && krb5confPath != null) {
+            System.setProperty("java.security.krb5.conf", krb5confPath);
+            UserGroupInformation.loginUserFromKeytab(keytabUser, keytabPath);
+        }else {
+            LOGGER.warn("Property:java.security.krb5.conf is not set! please check out your configuration");
+        }
+    }
 
     @Bean
     public IMetaStoreClient initHiveMetastoreClient() {
